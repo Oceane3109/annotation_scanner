@@ -1,0 +1,263 @@
+/* Variables de couleurs */
+:root {
+    --primary-color: #4a6cf7;
+    --primary-hover: #3a5ce4;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --body-bg: #f5f7ff;
+    --card-bg: #ffffff;
+    --border-radius: 10px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+}
+
+/* Réinitialisation et styles de base */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--body-bg);
+    color: #2c3e50;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* En-tête */
+.header {
+    background: linear-gradient(135deg, var(--primary-color), #6c5ce7);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    font-weight: 700;
+    margin: 0;
+    font-size: 2.2rem;
+}
+
+/* Cartes de classe */
+.class-card {
+    background: var(--card-bg);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 2rem;
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.class-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.class-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.class-name {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.package-name {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0 0;
+}
+
+.methods-count {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Cartes de méthode */
+.method-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: var(--transition);
+    border-left: 4px solid var(--secondary-color);
+}
+
+.method-card:hover {
+    transform: translateX(8px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.method-annotated {
+    border-left-color: var(--success-color);
+    background-color: rgba(40, 167, 69, 0.03);
+}
+
+.method-signature {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.return-type {
+    color: #9c27b0;
+    font-weight: 500;
+}
+
+.method-name {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Badges d'annotation */
+.annotation-badge {
+    background: rgba(74, 108, 247, 0.1);
+    color: var(--primary-color);
+    padding: 0.3rem 0.7rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin: 0.2rem 0.3rem 0.2rem 0;
+    display: inline-block;
+    border: 1px solid rgba(74, 108, 247, 0.2);
+    transition: var(--transition);
+}
+
+.annotation-badge:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Boutons */
+.btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.btn-outline-secondary {
+    border-color: #dee2e6;
+    color: var(--secondary-color);
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f8f9fa;
+    color: var(--dark-color);
+}
+
+/* Alertes */
+.alert {
+    border-radius: var(--border-radius);
+    padding: 1rem 1.25rem;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.alert-warning {
+    background-color: #fff8e6;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #e7f5ff;
+    color: #0c5460;
+}
+
+/* Animation de chargement */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animated {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .class-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .method-card {
+        padding: 1rem;
+    }
+}
+
+/* Effet de survol sur les cartes */
+.hover-lift {
+    transition: var(--transition);
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Style pour le badge "Annotée" */
+.badge-annotated {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--success-color);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+/* Amélioration des espacements */
+.container {
+    padding: 0 1.5rem;
+    max-width: 1200px;
+}
+
+/* Style pour les paramètres de méthode */
+.method-params {
+    color: #6c757d;
+    font-size: 0.9em;
+    margin-left: 0.3rem;
+}
+
+/* Style pour le pied de page */
+.footer {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 3rem;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}

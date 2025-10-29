@@ -8,13 +8,12 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,17 +30,13 @@ public class AnnotationScannerService {
 
     public List<ClassInfo> findClassesWithAnnotation(String annotationName) {
         List<ClassInfo> results = new ArrayList<>();
-        if (annotationName == null || annotationName.trim().isEmpty()) {
-            return results;
-        }
+        String targetAnnotation = annotationName.startsWith("@") ? 
+                                annotationName.substring(1) : annotationName;
 
         try {
-            // D'abord essayer de charger directement l'annotation
-            final Class<? extends Annotation> targetAnnotation = loadAnnotationClass(annotationName);
-            final String finalAnnotationName = annotationName;
-
-            // Recherche dans toutes les classes du package
-            String packageSearchPath = "classpath*:com/example/**/*.class";
+            // Récupérer toutes les classes du package de base
+            String basePackage = "com.example.scanner";
+            String packageSearchPath = "classpath*:" + basePackage.replace('.', '/') + "/**/*.class";
             Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
             
             for (Resource resource : resources) {
@@ -49,79 +44,73 @@ public class AnnotationScannerService {
                     if (resource.isReadable()) {
                         MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
                         AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-                        Class<?> clazz = Class.forName(metadata.getClassName());
                         
-                        ClassInfo classInfo = new ClassInfo();
-                        classInfo.setClassName(clazz.getSimpleName());
-                        classInfo.setPackageName(clazz.getPackage() != null ? clazz.getPackage().getName() : "");
+                        // Vérifier si la classe a l'annotation recherchée
+                        boolean hasTargetAnnotation = metadata.getAnnotationTypes().stream()
+                            .anyMatch(ann -> ann.equals(targetAnnotation) || 
+                                          ann.endsWith("." + targetAnnotation) ||
+                                          ann.endsWith("$" + targetAnnotation));
                         
-                        boolean hasAnnotation = (targetAnnotation != null && metadata.hasAnnotation(targetAnnotation.getName())) ||
-                            metadata.getAnnotationTypes().stream()
-                                .anyMatch(ann -> ann.equals(annotationName) || ann.endsWith("." + annotationName));
-                        
-                        for (Method method : clazz.getDeclaredMethods()) {
-                            List<Annotation> methodAnnotations = Arrays.asList(method.getAnnotations());
-                            boolean methodHasAnnotation = methodAnnotations.stream()
-                                .anyMatch(ann -> {
-                                    String annName = ann.annotationType().getName();
-                                    String simpleName = ann.annotationType().getSimpleName();
-                                    return (targetAnnotation != null && ann.annotationType().equals(targetAnnotation)) ||
-                                           annName.equals(finalAnnotationName) ||
-                                           simpleName.equals(finalAnnotationName) ||
-                                           annName.endsWith("." + finalAnnotationName);
-                                });
+                        if (hasTargetAnnotation) {
+                            Class<?> clazz = Class.forName(metadata.getClassName());
+                            ClassInfo classInfo = new ClassInfo();
+                            classInfo.setClassName(clazz.getSimpleName());
+                            classInfo.setPackageName(clazz.getPackage() != null ? clazz.getPackage().getName() : "");
+                            classInfo.setAnnotationName("@" + targetAnnotation);
                             
-                            if (methodHasAnnotation) {
-                                hasAnnotation = true;
+                            // Ajouter toutes les méthodes de la classe
+                            for (Method method : clazz.getDeclaredMethods()) {
                                 ClassInfo.MethodInfo methodInfo = new ClassInfo.MethodInfo();
                                 methodInfo.setName(method.getName());
                                 methodInfo.setReturnType(method.getReturnType().getSimpleName());
-                                methodInfo.setAnnotations(methodAnnotations.stream()
-                                    .map(ann -> ann.annotationType().getSimpleName())
-                                    .collect(Collectors.toList()));
+                                
+                                // Ajouter toutes les annotations de la méthode
+                                for (Annotation ann : method.getAnnotations()) {
+                                    String simpleName = ann.annotationType().getSimpleName();
+                                    if (!simpleName.equals("RequestMapping") && 
+                                        !ann.annotationType().isAnnotationPresent(RestController.class)) {
+                                        methodInfo.addAnnotation(simpleName);
+                                    }
+                                }
+                                
                                 classInfo.addAnnotatedMethod(methodInfo);
+                                
+                                // Afficher les méthodes avec leurs annotations pour le débogage
+                                if (!methodInfo.getAnnotations().isEmpty()) {
+                                    System.out.println(" - " + methodInfo.getName() + "() : " + 
+                                        methodInfo.getAnnotations().stream()
+                                            .map(a -> "@" + a)
+                                            .collect(Collectors.joining(", ")));
+                                }
                             }
-                        }
-                        
-                        if (hasAnnotation) {
-                            classInfo.setAnnotationName(finalAnnotationName);
                             
-                            if (results.stream().noneMatch(ci -> 
-                                ci.getClassName().equals(classInfo.getClassName()) && 
-                                ci.getPackageName().equals(classInfo.getPackageName()))) {
-                                results.add(classInfo);
-                                System.out.println("Found class with annotation '" + finalAnnotationName + "': " + clazz.getName());
-                                classInfo.getAnnotatedMethods().forEach(m -> 
-                                    System.out.println(" - " + m.getName() + "() : " + String.join(", ", m.getAnnotations()))
-                                );
-                            }
+                            results.add(classInfo);
+                            System.out.println("Found class: " + clazz.getName());
                         }
                     }
+                } catch (ClassNotFoundException e) {
+                    System.err.println("Could not load class: " + e.getMessage());
                 } catch (Exception e) {
-                    System.err.println("Error processing class: " + resource.getDescription());
+                    System.err.println("Error processing class: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
-        } catch (Exception e) {
-            System.err.println("Error during annotation scanning: ");
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("Error scanning for classes: " + e.getMessage());
         }
         
         return results;
     }
+    
     /**
-     * Trouve toutes les annotations utilisées dans le projet
-     * @return Liste des noms d'annotations uniques
-     */
-    /**
-     * Tries to load an annotation class by name
-     * @param annotationName The name of the annotation to load
+     * Gets a standard annotation class by simple name
+     * @param annotationName The simple name of the annotation (e.g., "GetMapping")
      * @return The annotation class or null if not found
      */
     @SuppressWarnings("unchecked")
-    private Class<? extends Annotation> loadAnnotationClass(String annotationName) {
+    private Class<? extends Annotation> getAnnotationClass(String annotationName) {
+        // Try to load the annotation class directly
         try {
-            // Try to load the annotation class directly
             return (Class<? extends Annotation>) Class.forName(annotationName);
         } catch (ClassNotFoundException e) {
             // If the class is not found with the exact name, try with common packages
@@ -150,11 +139,6 @@ public class AnnotationScannerService {
         }
     }
     
-    /**
-     * Gets a standard annotation class by simple name
-     * @param annotationName The simple name of the annotation (e.g., "GetMapping")
-     * @return The annotation class or null if not found
-     */
     @SuppressWarnings("unchecked")
     private Class<? extends Annotation> getStandardAnnotation(String annotationName) {
         // Map of common annotation simple names to their full class names
