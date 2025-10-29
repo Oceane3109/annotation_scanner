@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultats du scan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Résultats du scan pour <span th:text="${annotationName}" class="text-primary"></span></h1>
+        
+        <div class="mt-4">
+            <a href="/" class="btn btn-secondary mb-3">Nouvelle recherche</a>
+            
+            <div th:if="${classes.isEmpty()}" class="alert alert-warning">
+                Aucune classe trouvée avec l'annotation spécifiée.
+            </div>
+            
+            <div th:each="classInfo : ${classes}" class="card mb-3">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <span th:text="${classInfo.className}" class="fw-bold"></span>
+                            <small class="text-muted" th:text="'(' + ${classInfo.packageName} + ')'"></small>
+                        </h5>
+                        <span class="badge bg-primary" th:text="${classInfo.annotationName}"></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h6>Méthodes :</h6>
+                    <ul class="list-unstyled">
+                        <li th:each="method : ${classInfo.methods}" class="ms-3">
+                            <code th:text="${method}"></code>
+                        </li>
+                        <li th:if="${classInfo.methods.isEmpty()}" class="text-muted fst-italic">
+                            Aucune méthode avec cette annotation
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

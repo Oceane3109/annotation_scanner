@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Annotation Scanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Annotation Scanner</h1>
+        
+        <div class="card">
+            <div class="card-body">
+                <form th:action="@{/scan}" method="post">
+                    <div class="mb-3">
+                        <label for="annotationName" class="form-label">Annotation à rechercher :</label>
+                        <input type="text" class="form-control" id="annotationName" name="annotationName" 
+                               th:value="${defaultAnnotation}" required>
+                        <div class="form-text">Exemple : org.springframework.stereotype.Controller</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Scanner</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h5>Annotations courantes :</h5>
+            <ul>
+                <li>@Controller : <code>org.springframework.stereotype.Controller</code></li>
+                <li>@Service : <code>org.springframework.stereotype.Service</code></li>
+                <li>@Repository : <code>org.springframework.stereotype.Repository</code></li>
+                <li>@Component : <code>org.springframework.stereotype.Component</code></li>
+                <li>@RestController : <code>org.springframework.web.bind.annotation.RestController</code></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
