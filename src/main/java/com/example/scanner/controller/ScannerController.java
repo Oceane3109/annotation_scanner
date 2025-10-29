@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Controller
 public class ScannerController {
@@ -24,10 +25,22 @@ public class ScannerController {
     }
 
     @PostMapping("/scan")
-    public String scan(@RequestParam("annotationName") String annotationName, Model model) {
-        List<ClassInfo> classes = scannerService.findClassesWithAnnotation(annotationName);
-        model.addAttribute("classes", classes);
-        model.addAttribute("annotationName", annotationName);
+    public String scan(@RequestParam("annotation") String annotationName, Model model) {
+        List<ClassInfo> results = scannerService.findClassesWithAnnotation(annotationName);
+        model.addAttribute("results", results);
+        model.addAttribute("searchedAnnotation", annotationName);
+        
+        // Ajouter la liste de toutes les annotations disponibles
+        Set<String> allAnnotations = scannerService.findAllAnnotations();
+        model.addAttribute("allAnnotations", allAnnotations);
+        
         return "results";
+    }
+    
+    @GetMapping("/all-annotations")
+    public String getAllAnnotations(Model model) {
+        Set<String> allAnnotations = scannerService.findAllAnnotations();
+        model.addAttribute("allAnnotations", allAnnotations);
+        return "all-annotations";
     }
 }

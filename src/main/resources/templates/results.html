@@ -12,11 +12,11 @@
         <div class="mt-4">
             <a href="/" class="btn btn-secondary mb-3">Nouvelle recherche</a>
             
-            <div th:if="${classes.isEmpty()}" class="alert alert-warning">
+            <div th:if="${results == null || results.isEmpty()}" class="alert alert-warning">
                 Aucune classe trouvée avec l'annotation spécifiée.
             </div>
             
-            <div th:each="classInfo : ${classes}" class="card mb-3">
+            <div th:each="classInfo : ${results}" class="card mb-3">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">

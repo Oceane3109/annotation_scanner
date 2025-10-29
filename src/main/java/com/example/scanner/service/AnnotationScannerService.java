@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -113,24 +116,66 @@ public class AnnotationScannerService {
         return null;
     }
     
-    private Class<? extends Annotation> getStandardAnnotation(String keyword) {
+    private Class<? extends Annotation> getStandardAnnotation(String simpleName) {
+        // Mapping des noms courts d'annotations standards vers leurs classes
         Map<String, Class<? extends Annotation>> standardAnnotations = new HashMap<>();
-        standardAnnotations.put("controller", org.springframework.stereotype.Controller.class);
-        standardAnnotations.put("restcontroller", org.springframework.web.bind.annotation.RestController.class);
-        standardAnnotations.put("service", org.springframework.stereotype.Service.class);
-        standardAnnotations.put("repository", org.springframework.stereotype.Repository.class);
-        standardAnnotations.put("component", org.springframework.stereotype.Component.class);
-        standardAnnotations.put("getmapping", org.springframework.web.bind.annotation.GetMapping.class);
-        standardAnnotations.put("postmapping", org.springframework.web.bind.annotation.PostMapping.class);
-        standardAnnotations.put("putmapping", org.springframework.web.bind.annotation.PutMapping.class);
-        standardAnnotations.put("deletemapping", org.springframework.web.bind.annotation.DeleteMapping.class);
-        standardAnnotations.put("requestmapping", org.springframework.web.bind.annotation.RequestMapping.class);
+        standardAnnotations.put("Controller", org.springframework.stereotype.Controller.class);
+        standardAnnotations.put("Service", org.springframework.stereotype.Service.class);
+        standardAnnotations.put("Repository", org.springframework.stereotype.Repository.class);
+        standardAnnotations.put("Component", org.springframework.stereotype.Component.class);
+        standardAnnotations.put("RestController", org.springframework.web.bind.annotation.RestController.class);
+        standardAnnotations.put("GetMapping", org.springframework.web.bind.annotation.GetMapping.class);
+        standardAnnotations.put("PostMapping", org.springframework.web.bind.annotation.PostMapping.class);
+        standardAnnotations.put("RequestMapping", org.springframework.web.bind.annotation.RequestMapping.class);
+        standardAnnotations.put("Autowired", org.springframework.beans.factory.annotation.Autowired.class);
         
-        return standardAnnotations.entrySet().stream()
-                .filter(entry -> entry.getKey().toLowerCase().contains(keyword.toLowerCase()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(null);
+        return standardAnnotations.get(simpleName);
     }
     
+    /**
+     * Trouve toutes les annotations utilisées dans le projet
+     * @return Liste des noms d'annotations uniques
+     */
+    public Set<String> findAllAnnotations() {
+        Set<String> allAnnotations = new HashSet<>();
+        
+        try {
+            // Scanner le classpath pour toutes les classes
+            String packageSearchPath = "classpath*:com/example/**/*.class";
+            Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
+            
+            for (Resource resource : resources) {
+                try {
+                    if (resource.isReadable()) {
+                        MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
+                        AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+                        
+                        // Ajouter les annotations de la classe
+                        allAnnotations.addAll(metadata.getAnnotationTypes());
+                        
+                        // Obtenir les méthodes et leurs annotations
+                        Class<?> clazz = Class.forName(metadata.getClassName());
+                        for (Method method : clazz.getDeclaredMethods()) {
+                            for (Annotation annotation : method.getAnnotations()) {
+                                allAnnotations.add(annotation.annotationType().getName());
+                            }
+                        }
+                        
+                        // Obtenir les annotations des champs
+                        for (Field field : clazz.getDeclaredFields()) {
+                            for (Annotation annotation : field.getAnnotations()) {
+                                allAnnotations.add(annotation.annotationType().getName());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error processing class: " + resource.getDescription());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error scanning for annotations: " + e.getMessage());
+        }
+        
+        return allAnnotations;
+    }
 }
