@@ -12,9 +12,22 @@
         <div class="card">
             <div class="card-body">
                 <form th:action="@{/scan}" method="post">
+                    <div class="text-center mt-4">
+            <p>Try searching for: 
+                <a href="#" class="badge bg-primary text-decoration-none me-1" th:each="ann : ${T(java.util.Arrays).asList('Controller', 'Service', 'Repository', 'GetMapping')}" 
+                   th:onclick="'document.getElementById(\'annotationName\').value = \'' + ann + '\'; document.forms[0].submit(); return false;'">
+                    @<span th:text="${ann}"></span>
+                </a>
+            </p>
+            <p class="mt-3">
+                <a href="/all-annotations" class="btn btn-outline-secondary btn-sm">
+                    View all annotations in project
+                </a>
+            </p>
+        </div>
                     <div class="mb-3">
                         <label for="annotationName" class="form-label">Annotation à rechercher :</label>
-                        <input type="text" class="form-control" id="annotationName" name="annotationName" 
+                        <input type="text" class="form-control" id="annotationName" name="annotation" 
                                th:value="${defaultAnnotation}" required>
                         <div class="form-text">Exemple : org.springframework.stereotype.Controller</div>
                     </div>
