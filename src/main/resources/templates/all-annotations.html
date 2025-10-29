@@ -1,73 +1,248 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>All Annotations</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotations du Projet - Annotation Scanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary-color: #6b7280;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
         .annotation-card {
-            cursor: pointer;
-            transition: all 0.3s ease;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
+
         .annotation-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-color);
         }
+
         .annotation-name {
-            font-family: 'Courier New', monospace;
-            color: #0d6efd;
+            font-family: 'Fira Code', monospace;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+            word-break: break-all;
+            background: #f5f3ff;
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .btn-try {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-try:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            color: white;
+        }
+
+        .btn-copy {
+            background-color: #f3f4f6;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-copy:hover {
+            background-color: #e5e7eb;
+            color: var(--text-color);
+        }
+
+        .count-badge {
+            background-color: #eef2ff;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            transition: opacity 0.2s;
+        }
+
+        .back-btn:hover {
+            color: white;
+            opacity: 0.9;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        .card-footer {
+            background: #f9fafb;
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .no-annotations {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px dashed var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 2.5rem 0;
+                border-radius: 0;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .annotation-name {
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <div class="row mb-4">
-            <div class="col-12 text-center">
-                <h1>All Annotations in Project</h1>
-                <p class="text-muted">Found <span th:text="${#sets.size(allAnnotations)}">0</span> unique annotations</p>
-                <a href="/" class="btn btn-outline-primary mb-3">Back to Home</a>
-            </div>
-        </div>
-
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            <div class="col" th:each="annotation : ${allAnnotations}">
-                <div class="card h-100 annotation-card" onclick="searchAnnotation(this)">
-                    <div class="card-body">
-                        <h5 class="card-title annotation-name" th:text="${annotation}">Annotation</h5>
-                        <button class="btn btn-sm btn-outline-primary mt-2" 
-                                onclick="event.stopPropagation(); copyToClipboard(this)">
-                            Copy
-                        </button>
+    <header class="header">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <a href="/" class="back-btn">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        Retour à l'accueil
+                    </a>
+                    <h1 class="display-5 fw-bold mb-3">Toutes les Annotations</h1>
+                    <div class="d-flex align-items-center justify-content-center gap-3">
+                        <span class="count-badge">
+                            <i class="bi bi-tag-fill me-1"></i>
+                            <span th:text="${#sets.size(allAnnotations)} + ' annotations trouvées'">0 annotations trouvées</span>
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </header>
 
+    <main class="container mb-5">
+        <div th:if="${#sets.size(allAnnotations) == 0}" class="no-annotations">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3 class="h5 mb-2">Aucune annotation trouvée</h3>
+            <p class="text-muted mb-0">Essayez d'analyser votre projet pour voir les annotations disponibles.</p>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="col" th:each="annotation : ${allAnnotations}">
+                <div class="annotation-card">
+                    <div class="card-body">
+                        <h5 class="h6 fw-bold mb-3">Annotation</h5>
+                        <code class="annotation-name d-block mb-4" th:text="${annotation}">@Annotation</code>
+                        <div class="mt-auto">
+                            <div class="d-flex align-items-center text-muted small mb-3">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <span>Cliquez sur "Essayer" pour voir les détails</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-copy" 
+                                onclick="copyToClipboard(this)"
+                                data-annotation="${annotation}">
+                            <i class="bi bi-clipboard me-1"></i> Copier
+                        </button>
+                        <a th:href="'/scan?annotation=' + ${#uris.escapeQueryParam(annotation)}" 
+                           class="btn btn-sm btn-try">
+                            <i class="bi bi-search me-1"></i> Essayer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function searchAnnotation(element) {
-            const annotation = element.querySelector('.annotation-name').textContent;
-            window.location.href = '/scan?annotation=' + encodeURIComponent(annotation);
-        }
-
         function copyToClipboard(button) {
             event.stopPropagation();
-            const annotation = button.parentElement.querySelector('.annotation-name').textContent;
+            const annotation = button.getAttribute('data-annotation');
             navigator.clipboard.writeText(annotation).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                button.classList.remove('btn-outline-primary');
-                button.classList.add('btn-success');
+                const originalHtml = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check2 me-1"></i> Copié';
+                button.classList.remove('btn-copy');
+                button.classList.add('btn-success', 'text-white');
                 
                 setTimeout(() => {
-                    button.textContent = originalText;
-                    button.classList.remove('btn-success');
-                    button.classList.add('btn-outline-primary');
+                    button.innerHTML = originalHtml;
+                    button.classList.remove('btn-success', 'text-white');
+                    button.classList.add('btn-copy');
                 }, 2000);
+            }).catch(err => {
+                console.error('Erreur lors de la copie: ', err);
             });
         }
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        // Gestion du clic sur la carte entière (sauf sur les boutons)
+        document.querySelectorAll('.annotation-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Ne rien faire si le clic est sur un bouton ou un lien
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || 
+                    e.target.closest('button') || e.target.closest('a')) {
+                    return;
+                }
+                
+                // Sinon, déclencher le clic sur le bouton "Essayer"
+                const tryButton = this.querySelector('.btn-try');
+                if (tryButton) {
+                    tryButton.click();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

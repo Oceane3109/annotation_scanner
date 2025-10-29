@@ -11,16 +11,17 @@ public class ClassInfo {
     private String annotationName;
     private List<MethodInfo> annotatedMethods = new ArrayList<>();
     
+    @Data
     public static class MethodInfo {
         private String name;
         private String returnType;
         private List<String> annotations = new ArrayList<>();
+        private boolean hasAnnotation;
         
-        // Getters et Setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getReturnType() { return returnType; }
-        public void setReturnType(String returnType) { this.returnType = returnType; }
+        public void addAnnotation(String annotation) {
+            this.annotations.add(annotation);
+            this.hasAnnotation = true;
+        }
         public List<String> getAnnotations() { return annotations; }
         public void setAnnotations(List<String> annotations) { this.annotations = annotations; }
     }

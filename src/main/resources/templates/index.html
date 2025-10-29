@@ -1,51 +1,237 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Annotation Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotation Scanner - Accueil</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .annotation-example {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .annotation-example h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        .annotation-badge {
+            background: rgba(74, 108, 247, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0.3rem;
+            display: inline-block;
+            border: 1px solid rgba(74, 108, 247, 0.2);
+            transition: var(--transition);
+            text-decoration: none !important;
+        }
+        .annotation-badge:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .example-code {
+            background: #2d2d2d;
+            color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+        }
+        .example-code .annotation {
+            color: #9cdcfe;
+        }
+        .example-code .class-name {
+            color: #4ec9b0;
+        }
+        .hero {
+            text-align: center;
+            padding: 4rem 0 2rem;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+    </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h1 class="mb-4">Annotation Scanner</h1>
-        
-        <div class="card">
-            <div class="card-body">
-                <form th:action="@{/scan}" method="post">
-                    <div class="text-center mt-4">
-            <p>Try searching for: 
-                <a href="#" class="badge bg-primary text-decoration-none me-1" th:each="ann : ${T(java.util.Arrays).asList('Controller', 'Service', 'Repository', 'GetMapping')}" 
-                   th:onclick="'document.getElementById(\'annotationName\').value = \'' + ann + '\'; document.forms[0].submit(); return false;'">
-                    @<span th:text="${ann}"></span>
-                </a>
-            </p>
-            <p class="mt-3">
-                <a href="/all-annotations" class="btn btn-outline-secondary btn-sm">
-                    View all annotations in project
-                </a>
-            </p>
+<body class="animated">
+    <header class="header">
+        <div class="container text-center">
+            <h1>Annotation Scanner</h1>
+            <p class="lead">Recherchez et explorez les annotations dans votre projet Spring Boot</p>
         </div>
-                    <div class="mb-3">
-                        <label for="annotationName" class="form-label">Annotation à rechercher :</label>
-                        <input type="text" class="form-control" id="annotationName" name="annotation" 
-                               th:value="${defaultAnnotation}" required>
-                        <div class="form-text">Exemple : org.springframework.stereotype.Controller</div>
+    </header>
+
+    <div class="container py-5">
+        <div class="search-container">
+            <div class="class-card p-4">
+                <form th:action="@{/scan}" method="post" class="mb-4">
+                    <div class="mb-4">
+                        <label for="annotationName" class="form-label fw-bold mb-2">Rechercher une annotation</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">@</span>
+                            <input type="text" class="form-control border-start-0" id="annotationName" 
+                                   name="annotation" th:value="${defaultAnnotation}" 
+                                   placeholder="Saisissez le nom d'une annotation..." required>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-search me-2"></i>Rechercher
+                            </button>
+                        </div>
+                        <div class="form-text mt-2">Exemple : <code>org.springframework.stereotype.Controller</code> ou simplement <code>Controller</code></div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Scanner</button>
                 </form>
+
+                <div class="text-center mb-4">
+                    <p class="text-muted mb-2">Essayer avec :</p>
+                    <div id="annotation-shortcuts" class="mb-3">
+                        <a href="#" class="annotation-badge" 
+                           th:each="ann : ${T(java.util.Arrays).asList('Controller', 'Service', 'Repository', 'GetMapping', 'PostMapping', 'Autowired')}" 
+                           th:data-annotation="${ann}">
+                            @<span th:text="${ann}"></span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/all-annotations" class="btn btn-outline-primary">
+                        <i class="bi bi-list-ul me-2"></i>Voir toutes les annotations du projet
+                    </a>
+                </div>
+            </div>
+
+            <div class="annotation-example mt-5">
+                <h3>Exemples d'annotations courantes</h3>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h5 class="fw-bold">Annotations de stéréotype</h5>
+                        <div class="example-code">
+                            <div><span class="annotation">@Controller</span></div>
+                            <div><span class="annotation">@Service</span></div>
+                            <div><span class="annotation">@Repository</span></div>
+                            <div><span class="annotation">@Component</span></div>
+                            <div><span class="annotation">@RestController</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <h5 class="fw-bold">Annotations de mapping</h5>
+                        <div class="example-code">
+                            <div><span class="annotation">@GetMapping</span>(<span class="text-warning">"/path"</span>)</div>
+                            <div><span class="annotation">@PostMapping</span>(<span class="text-warning">"/path"</span>)</div>
+                            <div><span class="annotation">@PutMapping</span>(<span class="text-warning">"/path/{id}"</span>)</div>
+                            <div><span class="annotation">@DeleteMapping</span>(<span class="text-warning">"/path/{id}"</span>)</div>
+                            <div><span class="annotation">@RequestMapping</span>(<span class="text-warning">"/api"</span>)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <h5 class="fw-bold">Annotations de configuration</h5>
+                        <div class="example-code">
+                            <div><span class="annotation">@Configuration</span></div>
+                            <div><span class="annotation">@Bean</span></div>
+                            <div><span class="annotation">@ComponentScan</span></div>
+                            <div><span class="annotation">@EnableAutoConfiguration</span></div>
+                            <div><span class="annotation">@SpringBootApplication</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <h5 class="fw-bold">Autres annotations utiles</h5>
+                        <div class="example-code">
+                            <div><span class="annotation">@Autowired</span></div>
+                            <div><span class="annotation">@Value</span>(<span class="text-warning">"${property.name}"</span>)</div>
+                            <div><span class="annotation">@Qualifier</span>(<span class="text-warning">"beanName"</span>)</div>
+                            <div><span class="annotation">@Profile</span>(<span class="text-warning">"dev"</span>)</div>
+                            <div><span class="annotation">@Scheduled</span>(fixedRate = 5000)</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="mt-4">
-            <h5>Annotations courantes :</h5>
-            <ul>
-                <li>@Controller : <code>org.springframework.stereotype.Controller</code></li>
-                <li>@Service : <code>org.springframework.stereotype.Service</code></li>
-                <li>@Repository : <code>org.springframework.stereotype.Repository</code></li>
-                <li>@Component : <code>org.springframework.stereotype.Component</code></li>
-                <li>@RestController : <code>org.springframework.web.bind.annotation.RestController</code></li>
-            </ul>
-        </div>
     </div>
+    <footer class="footer">
+        <div class="container">
+            <p class="mb-0">
+                <i class="bi bi-code-slash"></i> Développé avec Spring Boot et Java
+                <span class="mx-2">•</span>
+                <i class="bi bi-github"></i> <a href="#" class="text-decoration-none">Voir sur GitHub</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion des clics sur les boutons de raccourci d'annotations
+            const shortcuts = document.querySelectorAll('#annotation-shortcuts .annotation-badge');
+            const annotationInput = document.getElementById('annotationName');
+            const searchForm = document.querySelector('form');
+            
+            shortcuts.forEach(shortcut => {
+                shortcut.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const annotation = this.getAttribute('data-annotation');
+                    if (annotation && annotationInput) {
+                        // Mettre à jour la valeur du champ de recherche
+                        annotationInput.value = annotation;
+                        
+                        // Ajouter une classe pour l'effet visuel
+                        this.classList.add('active');
+                        setTimeout(() => this.classList.remove('active'), 200);
+                        
+                        // Soumettre le formulaire
+                        if (searchForm) {
+                            searchForm.submit();
+                        }
+                    }
+                });
+                
+                // Ajouter un effet de survol
+                shortcut.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                });
+                
+                shortcut.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                });
+            });
+            
+            // Gestion de la soumission du formulaire avec la touche Entrée
+            if (annotationInput) {
+                annotationInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && searchForm) {
+                        e.preventDefault();
+                        searchForm.submit();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
